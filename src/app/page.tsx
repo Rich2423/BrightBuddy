@@ -1,3 +1,5 @@
+import Dashboard from '../components/Dashboard';
+
 export default function Home() {
-  return <div>Hello from BrightBuddy!</div>;
+  return <Dashboard />;
 }
