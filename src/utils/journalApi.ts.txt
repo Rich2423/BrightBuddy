@@ -1,0 +1,17 @@
+import { supabase } from './supabaseClient';
+
+export async function addJournalEntry(userId: string, content: string) {
+  const { data, error } = await supabase
+    .from('journal_entries')
+    .insert([{ user_id: userId, content, created_at: new Date() }]);
+  return { data, error };
+}
+
+export async function getJournalEntries(userId: string) {
+  const { data, error } = await supabase
+    .from('journal_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  return { data, error };
+}

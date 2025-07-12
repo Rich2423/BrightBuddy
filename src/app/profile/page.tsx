@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ProtectedRoute from '../../components/ProtectedRoute';
 import AIConfig from '../../components/AIConfig';
 
 interface JournalEntry {
@@ -125,7 +126,8 @@ export default function ProfilePage() {
   const userName = profile?.name || 'Learner';
 
   return (
-    <div className="space-y-6">
+    <ProtectedRoute>
+      <div className="space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg">
         <div className="flex items-center justify-between">
@@ -349,6 +351,7 @@ export default function ProfilePage() {
           </span>
         </Link>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 } 

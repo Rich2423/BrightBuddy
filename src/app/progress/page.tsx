@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ProtectedRoute from '../../components/ProtectedRoute';
 import { 
   JournalEntry, 
   UserProfile, 
@@ -441,7 +442,8 @@ export default function ProgressPage() {
   const timeRange = getTimeRange();
 
   return (
-    <div className="space-y-6">
+    <ProtectedRoute>
+      <div className="space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
         <div className="flex items-center justify-between">
@@ -652,6 +654,7 @@ export default function ProgressPage() {
           </span>
         </Link>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 } 

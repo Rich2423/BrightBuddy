@@ -1,0 +1,38 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { addJournalEntry, getJournalEntries } from '@/utils/journalApi';
+
+export default function JournalPage() {
+  const [entries, setEntries] = useState([]);
+  const [content, setContent] = useState('');
+  const userId = 'user123'; // Replace with actual user ID if you have auth
+
+  useEffect(() => {
+    async function fetchEntries() {
+      const { data } = await getJournalEntries(userId);
+      setEntries(data || []);
+    }
+    fetchEntries();
+  }, []);
+
+  async function handleAddEntry() {
+    await addJournalEntry(userId, content);
+    setContent('');
+    const { data } = await getJournalEntries(userId);
+    setEntries(data || []);
+  }
+
+  return (
+    <div>
+      <h1>Journal</h1>
+      <textarea value={content} onChange={e => setContent(e.target.value)} />
+      <button onClick={handleAddEntry}>Add Entry</button>
+      <ul>
+        {entries.map(entry => (
+          <li key={entry.id}>{entry.content} ({entry.created_at})</li>
+        ))}
+      </ul>
+    </div>
+  );
+}

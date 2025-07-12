@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '../utils/AuthContext';
+import UserProfile from './UserProfile';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Dashboard', icon: '🏠' },
@@ -42,11 +45,32 @@ export default function Navigation() {
             ))}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button className="text-gray-600 hover:text-gray-800">
-              <span className="text-2xl">☰</span>
-            </button>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <UserProfile />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/auth/login"
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button className="text-gray-600 hover:text-gray-800">
+                <span className="text-2xl">☰</span>
+              </button>
+            </div>
           </div>
         </div>
 

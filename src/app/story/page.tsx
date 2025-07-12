@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import ProtectedRoute from '../../components/ProtectedRoute';
 import LearningSuggestions from '../../components/LearningSuggestions';
 
 interface JournalEntry {
@@ -80,7 +81,8 @@ export default function JournalEntryPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <ProtectedRoute>
+      <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">📝 Today's Learning Adventure</h1>
@@ -191,6 +193,7 @@ export default function JournalEntryPage() {
           </div>
         </form>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 } 

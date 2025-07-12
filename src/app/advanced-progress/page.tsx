@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ProtectedRoute from '../../components/ProtectedRoute';
 import { 
   LearningGoal, 
   GoalTemplate, 
@@ -137,7 +138,8 @@ export default function AdvancedProgressPage() {
   const reflectionStats = getReflectionStats(reflections);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -704,6 +706,7 @@ export default function AdvancedProgressPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 } 
