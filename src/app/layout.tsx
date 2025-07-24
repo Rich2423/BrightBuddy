@@ -4,6 +4,8 @@ import "./globals.css";
 import Navigation from "../components/Navigation";
 import { AuthProvider } from "../utils/AuthContext";
 import { NotificationProvider } from "../components/NotificationSystem";
+import FeedbackWidget from "../components/FeedbackWidget";
+import { useFeedbackWidget } from "../components/FeedbackWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

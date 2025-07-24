@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../utils/AuthContext';
 import UserProfile from './UserProfile';
+import { useFeedbackWidget } from './FeedbackWidget';
+import FeedbackWidget from './FeedbackWidget';
 
 export default function Navigation() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { isOpen, openFeedback, closeFeedback } = useFeedbackWidget();
 
   const navItems = [
     { href: '/', label: 'Dashboard', icon: '🏠' },
@@ -49,6 +52,14 @@ export default function Navigation() {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Beta Feedback Button */}
+            <button
+              onClick={openFeedback}
+              className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+            >
+              💬 Beta Feedback
+            </button>
+            
             {user ? (
               <UserProfile />
             ) : (
@@ -97,6 +108,9 @@ export default function Navigation() {
           </div>
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget isOpen={isOpen} onClose={closeFeedback} />
     </nav>
   );
 } 
