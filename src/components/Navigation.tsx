@@ -11,6 +11,9 @@ export default function Navigation() {
 
   const navItems = [
     { href: '/', label: 'Dashboard', icon: '🏠' },
+    { href: '/activities', label: 'Activities', icon: '��' },
+    { href: '/achievements', label: 'Achievements', icon: '🏅' },
+    { href: '/analytics', label: 'Analytics', icon: '📈' },
     { href: '/story', label: 'Journal', icon: '📝' },
     { href: '/profile', label: 'Profile', icon: '👤' },
     { href: '/progress', label: 'Progress', icon: '📊' },

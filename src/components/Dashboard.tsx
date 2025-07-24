@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from './ProtectedRoute';
+import { useAuth } from '../utils/AuthContext';
+import { freemiumSystem, FREEMIUM_CONFIG } from '../utils/FreemiumSystem';
+import { activityManager } from '../utils/ActivityDatabase';
+import { usePendingNotifications } from './usePendingNotifications';
+import { analyticsSystem } from '../utils/AnalyticsSystem';
 import { 
   JournalEntry, 
   UserProfile, 
@@ -19,16 +24,22 @@ import {
 } from './DataUtils';
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dailyUsage, setDailyUsage] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [recommendedActivities, setRecommendedActivities] = useState<any[]>([]);
+  
+  // Check for pending notifications
+  usePendingNotifications();
 
   useEffect(() => {
-    // Initialize sample data if none exists
-    initializeSampleData();
-    
-    // Load data from localStorage
-    const loadData = () => {
+    const loadData = async () => {
+      // Initialize sample data if none exists
+      initializeSampleData();
+      
       try {
         const storedEntries = localStorage.getItem('journalEntries');
         const storedProfile = localStorage.getItem('userProfile');
@@ -40,6 +51,23 @@ export default function Dashboard() {
         if (storedProfile) {
           setProfile(JSON.parse(storedProfile));
         }
+
+        // Load freemium data
+        if (user) {
+          const userSubscription = await freemiumSystem.getUserSubscription(user.id);
+          const todayUsage = await freemiumSystem.getTodayUsage(user.id);
+          const recommendations = activityManager.getRecommendedActivities(user.id, 3);
+          
+          setSubscription(userSubscription);
+          setDailyUsage(todayUsage);
+          setRecommendedActivities(recommendations);
+          
+          // Track page view for analytics
+          await analyticsSystem.trackEvent(user.id, 'page_view', {
+            page: 'dashboard',
+            timestamp: new Date().toISOString()
+          });
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -48,7 +76,7 @@ export default function Dashboard() {
     };
 
     loadData();
-  }, []);
+  }, [user]);
 
   const getTodayEntry = () => {
     const today = new Date().toDateString();
@@ -166,6 +194,94 @@ export default function Dashboard() {
           <div className="text-sm text-gray-600">Avg Mood</div>
         </div>
       </div>
+
+      {/* Freemium Status & Daily Activities */}
+      {dailyUsage && (
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-800">Daily Learning Activities</h2>
+            <Link href="/activities">
+              <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">View All Activities →</span>
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Daily Progress */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold text-blue-800">Today's Progress</span>
+                <span className="text-2xl">🎯</span>
+              </div>
+              <div className="text-3xl font-bold text-blue-600 mb-1">
+                {dailyUsage.activitiesCompleted}/{FREEMIUM_CONFIG.FREE_TIER.dailyActivityLimit}
+              </div>
+              <div className="text-sm text-blue-600">Activities Completed</div>
+              
+              {/* Progress Bar */}
+              <div className="mt-3 w-full bg-blue-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${Math.min((dailyUsage.activitiesCompleted / FREEMIUM_CONFIG.FREE_TIER.dailyActivityLimit) * 100, 100)}%` 
+                  }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Subscription Status */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold text-purple-800">Your Plan</span>
+                <span className="text-2xl">{subscription?.tier === 'premium' ? '⭐' : '📚'}</span>
+              </div>
+              <div className="text-2xl font-bold text-purple-600 mb-1 capitalize">
+                {subscription?.tier || 'Free'}
+              </div>
+              <div className="text-sm text-purple-600">
+                {subscription?.tier === 'premium' ? 'Unlimited Activities' : `${FREEMIUM_CONFIG.FREE_TIER.dailyActivityLimit} Activities/Day`}
+              </div>
+            </div>
+
+            {/* Recommended Activities */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg font-semibold text-green-800">Recommended</span>
+                <span className="text-2xl">💡</span>
+              </div>
+              <div className="text-2xl font-bold text-green-600 mb-1">
+                {recommendedActivities.length}
+              </div>
+              <div className="text-sm text-green-600">Activities for You</div>
+              
+              {recommendedActivities.length > 0 && (
+                <div className="mt-2">
+                  <div className="text-xs text-green-600 font-medium">
+                    {recommendedActivities[0]?.title}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Action Buttons */}
+          <div className="mt-6 flex gap-3">
+            <Link href="/activities" className="flex-1">
+              <button className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                🎮 Start Learning Activity
+              </button>
+            </Link>
+            
+            {subscription?.tier === 'free' && dailyUsage.activitiesCompleted >= FREEMIUM_CONFIG.FREE_TIER.dailyActivityLimit && (
+              <button 
+                onClick={() => console.log('Navigate to upgrade')}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium"
+              >
+                ⭐ Upgrade to Premium
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Recent Entries Timeline */}
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
